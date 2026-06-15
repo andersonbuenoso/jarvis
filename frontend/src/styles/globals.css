@@ -18,6 +18,10 @@ body {
   background: hsl(var(--background));
 }
 
+.dark body {
+  background: #020617;
+}
+
 button,
 input,
 select,

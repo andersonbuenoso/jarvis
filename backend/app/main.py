@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes.auth_routes import router as auth_router
 from app.api.routes.slack_routes import router as slack_router
 from app.api.routes.task_routes import router as task_router
 from app.core.config import get_settings
-from app.core.database import Base, engine
+from app.core.database import Base, SessionLocal, engine
 from app.seed import seed_database
+from app.services.auth_service import ensure_admin_user
 from app.services.scheduler_service import start_scheduler, stop_scheduler
 
 settings = get_settings()
@@ -24,6 +26,11 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        ensure_admin_user(db)
+    finally:
+        db.close()
     seed_database()
     start_scheduler()
 
@@ -38,5 +45,6 @@ def health():
     return {"status": "ok", "app": settings.app_name}
 
 
+app.include_router(auth_router, prefix="/api")
 app.include_router(task_router, prefix="/api")
 app.include_router(slack_router, prefix="/api")

@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     slack_focus_reminder_start_hour: int = 8
     slack_focus_reminder_end_hour: int = 18
     long_running_days: int = 3
+    admin_username: str | None = None
+    admin_password: str | None = None
+    auth_token_expire_minutes: int = 60 * 24 * 7
 
     class Config:
         env_file = ".env"
